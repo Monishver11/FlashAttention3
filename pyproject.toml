@@ -1,0 +1,18 @@
+[project]
+name = "FlashAttention3"
+version = "0.1.0"
+description = "FlashAttention-3 worklog: incremental kernel implementations in CuTe Python DSL on H100"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.6.0",
+    "numpy>=2.0",
+    "nvidia-cutlass-dsl",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }

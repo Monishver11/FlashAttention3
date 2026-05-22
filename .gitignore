@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.python-version
+
+# uv
+.uv-cache/
+
+# Profiling artifacts
+*.ncu-rep
+*.nsys-rep
+*.qdrep
+*.sqlite
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs and scratch
+*.log
+logs/
