@@ -17,7 +17,7 @@ Usage:
 import argparse
 import importlib
 import os
-
+os.environ.setdefault("CUTE_DSL_ARCH", "sm_90a")
 import torch
 
 from utils import make_qkvo
