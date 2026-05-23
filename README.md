@@ -1,10 +1,10 @@
-#### FlashAttention3-worklog
+### FlashAttention3-worklog
 
 Companion repo for the FlashAttention-3 worklog blog. Incremental kernel implementations in CuTe Python DSL on H100, from a naive baseline through FP8 with incoherent processing.
 
 Blog post: [link](https://monishver11.github.io/blog/2026/fa3-worklog/)
 
-##### Hardware and software
+#### Hardware and software
 
 All measurements in the blog use the following stack:
 
@@ -19,7 +19,7 @@ All measurements in the blog use the following stack:
 
 <!-- TODO: clock locking and persistence mode. If clocks are locked (e.g. via `nvidia-smi -lgc <freq>` and `nvidia-smi -pm 1`), note the locked frequency. If not, add a reproducibility caveat. -->
 
-##### Repo structure
+#### Repo structure
 
 ```
 FlashAttention3/
@@ -47,7 +47,7 @@ Each kernel file in `kernels/` exports two functions:
 
 The harness is agnostic to kernel internals; it just calls these two entry points.
 
-##### Workload shape and conventions
+#### Workload shape and conventions
 
 The benchmark sweep is parameterized by:
 
@@ -57,18 +57,18 @@ The benchmark sweep is parameterized by:
 
 Two workload-size constants pin the total work per sweep configuration:
 
-- `HIDDEN_DIM = 2048`: total feature dimension, split across heads. Number of heads $H = \text{HIDDEN\_DIM} / d$, so $H = 32$ for $d = 64$ and $H = 16$ for $d = 128$.
-- `TOTAL_TOKENS = 16384`: total number of tokens across the batch. Logical batch $B_{\text{logical}} = \text{TOTAL\_TOKENS} / N$.
+- `HIDDEN_DIM = 2048`: total feature dimension, split across heads. Number of heads is `HIDDEN_DIM / d`, so 32 for `d = 64` and 16 for `d = 128`.
+- `TOTAL_TOKENS = 16384`: total number of tokens across the batch. Logical batch is `TOTAL_TOKENS / N`.
 
 **Heads are folded into the batch dimension** to keep launch geometry simple. The effective batch passed to the kernel is $B = B_{\text{logical}} \times H$, so each (head, batch) pair becomes one independent attention computation. The TFLOPS calculation in the harness unfolds this to report per-attention-call performance.
 
-##### Tensor layout convention
+#### Tensor layout convention
 
 PyTorch tensors are created in `(B, N, d)` row-major. Inside the kernels, we work with the CUTE view of the same memory in `(N, d, B)` layout, where $d$ is the stride-1 axis (K-major from the MMA's perspective) and $B$ is the outermost batch dimension. The view is constructed via `permute(1, 2, 0)` on the PyTorch tensor and wrapped with `from_dlpack` into a CUTE tensor. No data is copied.
 
 All four tensors (Q, K, V, O) share this layout for the BF16 kernels (K1 through K6). K7 introduces FP8, which requires a different V layout to satisfy WGMMA's K-major-only constraint for FP8 operands.
 
-##### Benchmark harness
+#### Benchmark harness
 
 `bench.py`'s flow:
 
@@ -79,7 +79,7 @@ All four tensors (Q, K, V, O) share this layout for the BF16 kernels (K1 through
 
 Warmup count, bench count, and sweep ranges are set near the top of `bench.py`. Defaults: 10 warmup, 30 bench. Bump these if results are noisy on your hardware.
 
-##### Correctness check
+#### Correctness check
 
 `ref_check.py` runs the kernel against `torch.nn.functional.scaled_dot_product_attention` on the same inputs and reports the diff. The check is opt-in via `CHECK=1`. When enabled, the output line includes:
 
@@ -90,9 +90,9 @@ Warmup count, bench count, and sweep ranges are set near the top of `bench.py`. 
 
 For BF16 kernels, a clean run has `bad = 0` and `max_abs` in the $10^{-2}$ range. K7 (FP8) uses a much looser tolerance because per-tensor scaling introduces real quantization error.
 
-##### How to run
+#### How to run
 
-###### One-time setup
+##### One-time setup
 
 ```bash
 cd fa3
@@ -100,7 +100,7 @@ uv sync
 source .venv/bin/activate
 ```
 
-###### Run a single config with a correctness check
+##### Run a single config with a correctness check
 
 ```bash
 # Pin one (seqlen, headdim, causal) triple via env vars.
@@ -109,7 +109,7 @@ CHECK=1 SEQLEN=512 HEADDIM=64 CAUSAL=0 python bench.py k1
 
 `CHECK=1` enables the SDPA correctness check. `SEQLEN`, `HEADDIM`, and `CAUSAL` are optional pins; omitting any of them sweeps that dimension.
 
-###### Run the full sweep for a kernel
+##### Run the full sweep for a kernel
 
 ```bash
 CHECK=1 python bench.py k1
@@ -117,11 +117,11 @@ CHECK=1 python bench.py k1
 
 Sweeps causal in `{0, 1}`, headdim in `{64, 128}`, seqlen in `{512, ..., 16384}`. 24 configs per run. Drop `CHECK=1` for timing-only runs.
 
-###### Other kernels
+##### Other kernels
 
 Same pattern, swap the kernel name: `python bench.py k2`, `python bench.py k3`, etc.
 
-###### Clear the compile cache
+##### Clear the compile cache
 
 Only needed after a GPU swap or for a clean rebuild:
 
