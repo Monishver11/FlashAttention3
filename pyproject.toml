@@ -6,7 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "torch>=2.6.0",
     "numpy>=2.0",
-    "nvidia-cutlass-dsl",
+    "nvidia-cutlass-dsl==4.1.0",
 ]
 
 [[tool.uv.index]]
