@@ -98,6 +98,7 @@ For BF16 kernels, a clean run has `bad = 0` and `max_abs` in the $10^{-2}$ range
 cd fa3
 uv sync
 source .venv/bin/activate
+export CUTE_DSL_ARCH=sm_90a
 ```
 
 ##### Run a single config with a correctness check
