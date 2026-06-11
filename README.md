@@ -95,7 +95,7 @@ For BF16 kernels, a clean run has `bad = 0` and `max_abs` in the $10^{-2}$ range
 ##### One-time setup
 
 ```bash
-cd fa3
+cd FlashAttention3
 uv sync
 source .venv/bin/activate
 export CUTE_DSL_ARCH=sm_90a
